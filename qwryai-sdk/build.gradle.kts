@@ -1,7 +1,10 @@
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    `maven-publish`
+    id("com.vanniktech.maven.publish")
 }
 
 group = "com.qwryai"
@@ -16,7 +19,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    publishing { singleVariant("release") { withSourcesJar() } }
 }
 
 dependencies {
@@ -26,11 +28,21 @@ dependencies {
     testImplementation("org.json:json:20240303")
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            artifactId = "qwryai-sdk"
-            afterEvaluate { from(components["release"]) }
+mavenPublishing {
+    configure(AndroidSingleVariantLibrary(variant = "release", sourcesJar = true, publishJavadocJar = true))
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+    coordinates("com.qwryai", "qwryai-sdk", version.toString())
+    pom {
+        name.set("QwryAI Android SDK")
+        description.set("Put your QwryAI agent inside an Android app.")
+        url.set("https://github.com/qwryai/qwryai-android")
+        licenses { license { name.set("MIT License"); url.set("https://opensource.org/licenses/MIT") } }
+        developers { developer { id.set("qwryai"); name.set("QwryAI"); url.set("https://www.qwryai.com") } }
+        scm {
+            url.set("https://github.com/qwryai/qwryai-android")
+            connection.set("scm:git:https://github.com/qwryai/qwryai-android.git")
+            developerConnection.set("scm:git:ssh://git@github.com/qwryai/qwryai-android.git")
         }
     }
 }
